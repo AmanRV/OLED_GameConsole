@@ -62,6 +62,20 @@ const unsigned char epd_bitmap_cloud [] PROGMEM = {
 	0x42, 0x12, 0x40, 0x22, 0x60, 0x02, 0x30, 0x04, 0x1f, 0xf8, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
 };
 
+// 'obstacle', 7x45px
+const unsigned char epd_bitmap_obstacle [] PROGMEM = {
+	0x10, 0x38, 0xfe, 0xfe, 0x38, 0x38, 0x38, 0x38, 0x38, 0x38, 0x38, 0x38, 0x38, 0x38, 0x38, 0x38, 
+	0x38, 0x38, 0x38, 0x38, 0x38, 0x38, 0x38, 0x38, 0x38, 0x38, 0x38, 0x38, 0x38, 0x38, 0x38, 0x38, 
+	0x38, 0x38, 0x38, 0x38, 0x38, 0x38, 0x38, 0x38, 0x38, 0x38, 0x38, 0x38, 0x38
+};
+
+// Array of all bitmaps for convenience. (Total bytes used to store images in PROGMEM = 64)
+const int epd_bitmap_allArray_LEN = 1;
+const unsigned char* epd_bitmap_allArray[1] = {
+	epd_bitmap_obstacle
+};
+
+
 //button pins
 const int buttonPin = 9;
 const int buttonPin2 = 10;
@@ -89,13 +103,18 @@ int score = 0;
 int framer1=1;
 int framer2=-1;
 int spritey = 0;
-int x=-5;
+int x=-13;
 int cloudy = random(5,25);
 int cloudy2 = random(5,25);
 int cloudspeed = 0;
 int cloudspeed2 = 0;
 bool isJumping = false;
 unsigned long time = 0;
+int obsspeed = 0;
+int obsy = 51;
+int speedmult = 2;
+unsigned long time2 = 0;
+unsigned long time3 = 0;
 
 unsigned long lastDebounceTime = 0;
 unsigned long debounceDelay = 25;
@@ -195,7 +214,7 @@ void loop() {
 
   //menu
   if (menu == 0){
-
+    time3 = millis();
     //snake menu
     if (selection == 0){
       display.setTextColor(WHITE);
@@ -250,9 +269,25 @@ void loop() {
     }
 
     if (selection == 1 and buttonClicked2() ==true){
-      int framer1 =1;
-      int framer2=-1;
-      unsigned long time = 0;
+      framer1=1;
+      framer2=-1;
+      spritey = 0;
+      x=-13;
+      cloudy = random(5,25);
+      cloudy2 = random(5,25);
+      cloudspeed = 0;
+      cloudspeed2 = 0;
+      isJumping = false;
+      time = 0;
+      obsspeed = 0;
+      obsy = 100;
+      speedmult = 2;
+
+
+      lastDebounceTime = 0;
+      debounceDelay = 25;
+      lastDebounceTime2 = 0;
+      debounceDelay2 = 25;
       menu = 2;
     }
 
@@ -289,9 +324,17 @@ void loop() {
 
   //dino
   if (menu == 2){
-    display.drawRect(0,59,128,5,WHITE);
-    display.drawBitmap(130-(cloudspeed*2), cloudy,epd_bitmap_cloud,16,16,WHITE);
-    display.drawBitmap(190-(cloudspeed2), cloudy2,epd_bitmap_cloud,16,16,WHITE);
+    time2 = millis() - time3;
+
+    display.setTextColor(SSD1306_WHITE);
+    display.setTextSize(1);
+    display.setCursor(0, 0);
+    display.println(time2/500);
+    speedmult = ((time2/500)+100)/50;
+
+
+
+
 
     if ((cloudspeed*2) > 140){
       cloudspeed=0;
@@ -302,7 +345,13 @@ void loop() {
       cloudspeed2=0;
       cloudy2 = random(5,25);
     }
+
+    if ((obsspeed) > 140){
+      obsspeed=0;
+      obsy = random(35,55);
+    }
     
+    obsspeed = obsspeed + (1*speedmult);
 
 
     if ((millis() - time) > 100){
@@ -319,14 +368,15 @@ void loop() {
     }
 
     if (isJumping){
-      spritey = (-(x*x))+32;
+      spritey = ((-0.166)*(x*x))+32;
+
       x+=1;
     }
 
     if (spritey < 0){
         isJumping = false;
         spritey = 0;
-        x=-5;
+        x=-13;
 
     }
 
@@ -341,6 +391,26 @@ void loop() {
       menu = 0;
       selection = 0;
     }
+
+    if (((20 > 130-(obsspeed)) and (20 < (130-(obsspeed)+7))) and ((((46-spritey)*framer2)+7) > obsy)){
+      menu = 0;
+      selection = 0;
+    }
+
+    if (((15 > 130-(obsspeed)) and (15 < (130-(obsspeed)+7))) and ((((46-spritey)*framer2)+7) > obsy)){
+      menu = 0;
+      selection = 0;
+    }
+
+    if (((26 > 130-(obsspeed)) and (26 < (130-(obsspeed)+7))) and ((((46-spritey)*framer2)+7) > obsy)){
+      menu = 0;
+      selection = 0;
+    }
+
+    display.drawRect(0,59,128,5,WHITE);
+    display.drawBitmap(130-(cloudspeed*2), cloudy,epd_bitmap_cloud,16,16,WHITE);
+    display.drawBitmap(190-(cloudspeed2), cloudy2,epd_bitmap_cloud,16,16,WHITE);
+    display.drawBitmap(130-(obsspeed), obsy,epd_bitmap_obstacle,7,45,WHITE);
 
 
 
