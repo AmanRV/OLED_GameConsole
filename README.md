@@ -9,6 +9,7 @@ The goal of this project was to introduce me to the basics of creating circuits,
 ## Images
 ![Screenshot](FrontCircuit.jpg)
 ![Screenshot](BackCircuit.jpg)
+![GIF](DinoRun.gif)
 
 ## Materials
 
